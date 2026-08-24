@@ -6,30 +6,34 @@
 <title>MC 头像生成器</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem; }
-  h1 { font-size: 1.5rem; margin-bottom: 1.5rem; color: #79c0ff; }
-  .container { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; max-width: 900px; width: 100%; }
-  .panel { background: #16213e; border-radius: 12px; padding: 1.5rem; flex: 1; min-width: 280px; }
-  .panel h2 { font-size: 1rem; color: #a5d6ff; margin-bottom: 1rem; border-bottom: 1px solid #2a3f5f; padding-bottom: 0.5rem; }
-  .form-group { margin-bottom: 1rem; }
-  label { display: block; font-size: 0.85rem; color: #8ab4f8; margin-bottom: 0.3rem; }
-  input[type="file"], select, input[type="number"], input[type="color"] { width: 100%; padding: 0.4rem; border-radius: 6px; border: 1px solid #2a3f5f; background: #0f1629; color: #eee; font-size: 0.9rem; }
-  .preview { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
-  .preview img, .preview canvas { max-width: 256px; max-height: 256px; border: 2px solid #2a4; border-radius: 8px; background: #000; image-rendering: pixelated; }
-  .preview .placeholder { width: 256px; height: 256px; border: 2px dashed #2a3f5f; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #555; font-size: 0.85rem; }
-  button { width: 100%; padding: 0.6rem; border-radius: 8px; border: none; background: #238636; color: #fff; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; }
+  body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 1.5rem; }
+  h1 { font-size: 1.4rem; margin-bottom: 1rem; color: #79c0ff; text-align: center; }
+  .container { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; max-width: 860px; width: 100%; }
+  .panel { background: #16213e; border-radius: 12px; padding: 1.2rem; flex: 1; min-width: 260px; }
+  .panel h2 { font-size: 0.9rem; color: #a5d6ff; margin-bottom: 0.8rem; border-bottom: 1px solid #2a3f5f; padding-bottom: 0.4rem; }
+  .form-group { margin-bottom: 0.7rem; }
+  label { display: block; font-size: 0.8rem; color: #8ab4f8; margin-bottom: 0.25rem; }
+  input[type="file"], select, input[type="number"] { width: 100%; padding: 0.35rem; border-radius: 6px; border: 1px solid #2a3f5f; background: #0f1629; color: #eee; font-size: 0.85rem; }
+  input[type="color"] { width: 38px; height: 30px; padding: 0; border-radius: 4px; border: 1px solid #2a3f5f; background: none; cursor: pointer; }
+  .color-row { display: flex; gap: 0.4rem; align-items: center; }
+  .color-row span { font-size: 0.75rem; color: #666; }
+  .hint { font-size: 0.7rem; color: #555; margin-top: 0.2rem; }
+  button { width: 100%; padding: 0.5rem; border-radius: 8px; border: none; background: #238636; color: #fff; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
   button:hover { background: #2ea043; }
   button:disabled { background: #333; color: #666; cursor: not-allowed; }
-  .hint { font-size: 0.75rem; color: #666; margin-top: 0.3rem; }
-  .color-row { display: flex; gap: 0.5rem; align-items: center; }
-  .color-row input[type="color"] { width: 40px; height: 32px; padding: 0; border-radius: 4px; }
-  .color-row span { font-size: 0.8rem; color: #888; }
-  .error { color: #f66; font-size: 0.85rem; margin-top: 0.5rem; text-align: center; }
-  .loading { color: #79c0ff; font-size: 0.85rem; text-align: center; margin-top: 0.5rem; }
+  .preview { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; }
+  .preview canvas { max-width: 256px; max-height: 256px; border: 2px solid #2a4; border-radius: 8px; background: #000; image-rendering: pixelated; }
+  .placeholder { width: 256px; height: 256px; border: 2px dashed #2a3f5f; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #555; font-size: 0.8rem; text-align: center; padding: 1rem; }
+  .status { font-size: 0.8rem; text-align: center; margin-top: 0.4rem; min-height: 1.2rem; }
+  .status.error { color: #f66; }
+  .status.ok { color: #6f6; }
+  .badge { display: inline-block; background: #238636; color: #fff; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; margin-bottom: 0.5rem; }
 </style>
 </head>
 <body>
 <h1>🎮 MC 头像生成器</h1>
+<div class="badge">纯前端 · 无需服务器</div>
+
 <div class="container">
   <div class="panel">
     <h2>⚙️ 参数设置</h2>
@@ -41,7 +45,7 @@
       <label>描边类型</label>
       <select id="outlineType">
         <option value="none">无描边</option>
-        <option value="solid">纯色描边</option>
+        <option value="solid" selected>纯色描边</option>
         <option value="glow">发光描边</option>
         <option value="pulse">脉冲描边</option>
       </select>
@@ -51,7 +55,7 @@
       <div class="color-row">
         <input type="color" id="outlineColor" value="#000000">
         <input type="color" id="outlineColor2" value="#ffffff">
-        <span>（发光/脉冲用第二个颜色）</span>
+        <span>发光/脉冲用第二个</span>
       </div>
     </div>
     <div class="form-group">
@@ -62,7 +66,7 @@
       <label>背景类型</label>
       <select id="bgType">
         <option value="none">无背景</option>
-        <option value="solid">纯色背景</option>
+        <option value="solid" selected>纯色背景</option>
         <option value="gradient">渐变背景</option>
         <option value="blur">模糊背景</option>
         <option value="noise">噪点背景</option>
@@ -73,32 +77,32 @@
       <div class="color-row">
         <input type="color" id="bgColor" value="#1a1a2e">
         <input type="color" id="bgColor2" value="#16213e">
-        <span>（渐变用第二个颜色）</span>
+        <span>渐变用第二个</span>
       </div>
     </div>
     <div class="form-group">
       <label>缩放倍数</label>
       <input type="number" id="scale" value="4" min="1" max="32">
-      <div class="hint">预览建议 4x，下载可用更高倍数</div>
+      <div class="hint">预览 4x 即可，下载可用更高倍数</div>
     </div>
     <button id="generateBtn" disabled>⬆️ 请先上传图片</button>
-    <div id="statusMsg" class="error" style="display:none"></div>
+    <div id="statusMsg" class="status"></div>
   </div>
   <div class="panel">
     <h2>🖼️ 预览</h2>
     <div class="preview">
       <div class="placeholder" id="previewBox">上传图片后预览</div>
-      <img id="previewImg" style="display:none">
+      <canvas id="previewCanvas" style="display:none"></canvas>
     </div>
-    <button id="downloadBtn" disabled style="margin-top:1rem">💾 下载头像</button>
+    <button id="downloadBtn" disabled style="margin-top:0.8rem">💾 下载头像</button>
   </div>
 </div>
 
 <script type="module">
-const API_BASE = window.location.origin;
+import { processTexture } from './dist/avatar-gen.mjs';
 
 const sourceFile = document.getElementById('sourceFile');
-const previewImg = document.getElementById('previewImg');
+const previewCanvas = document.getElementById('previewCanvas');
 const previewBox = document.getElementById('previewBox');
 const generateBtn = document.getElementById('generateBtn');
 const downloadBtn = document.getElementById('downloadBtn');
@@ -106,58 +110,71 @@ const statusMsg = document.getElementById('statusMsg');
 
 let lastOutput = null;
 
-function showError(msg) {
+function setStatus(msg, type) {
   statusMsg.textContent = msg;
-  statusMsg.style.display = 'block';
+  statusMsg.className = 'status ' + (type || '');
 }
-function hideError() { statusMsg.style.display = 'none'; }
+
+function loadImageFile(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.width;
+      c.height = img.height;
+      c.getContext('2d').drawImage(img, 0, 0);
+      resolve(c);
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
 
 sourceFile.addEventListener('change', () => {
-  generateBtn.disabled = !sourceFile.files[0];
-  generateBtn.textContent = sourceFile.files[0] ? '🎲 生成头像' : '⬆️ 请先上传图片';
-  previewImg.style.display = 'none';
-  previewBox.style.display = 'flex';
-  lastOutput = null;
-  downloadBtn.disabled = true;
+  const hasFile = !!sourceFile.files[0];
+  generateBtn.disabled = !hasFile;
+  generateBtn.textContent = hasFile ? '🎲 生成头像' : '⬆️ 请先上传图片';
+  if (!hasFile) {
+    previewCanvas.style.display = 'none';
+    previewBox.style.display = 'flex';
+    lastOutput = null;
+    downloadBtn.disabled = true;
+  }
 });
 
 generateBtn.addEventListener('click', async () => {
   if (!sourceFile.files[0]) return;
-  hideError();
+  setStatus('生成中...', '');
   generateBtn.disabled = true;
   generateBtn.textContent = '⏳ 生成中...';
-  previewImg.style.display = 'none';
-  previewBox.style.display = 'flex';
-  previewBox.textContent = '生成中...';
-
-  const formData = new FormData();
-  formData.append('image', sourceFile.files[0]);
-  formData.append('outlineType', document.getElementById('outlineType').value);
-  formData.append('outlineColor', document.getElementById('outlineColor').value);
-  formData.append('outlineColor2', document.getElementById('outlineColor2').value);
-  formData.append('outlineWidth', document.getElementById('outlineWidth').value);
-  formData.append('bgType', document.getElementById('bgType').value);
-  formData.append('bgColor', document.getElementById('bgColor').value);
-  formData.append('bgColor2', document.getElementById('bgColor2').value);
-  formData.append('scale', document.getElementById('scale').value);
 
   try {
-    const res = await fetch(`${API_BASE}/generate`, { method: 'POST', body: formData });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `HTTP ${res.status}`);
-    }
-    const buf = await res.arrayBuffer();
-    const blob = new Blob([buf], { type: 'image/png' });
-    const url = URL.createObjectURL(blob);
-    previewImg.src = url;
-    previewImg.style.display = 'block';
+    const img = await loadImageFile(sourceFile.files[0]);
+
+    const result = processTexture(img, {
+      scale: parseInt(document.getElementById('scale').value) || 4,
+      outlineType: document.getElementById('outlineType').value,
+      outlineColor: document.getElementById('outlineColor').value,
+      outlineColor2: document.getElementById('outlineColor2').value,
+      outlineWidth: parseInt(document.getElementById('outlineWidth').value) || 2,
+      bgType: document.getElementById('bgType').value,
+      bgColor: document.getElementById('bgColor').value,
+      bgColor2: document.getElementById('bgColor2').value,
+    });
+
+    previewCanvas.width = result.width;
+    previewCanvas.height = result.height;
+    const ctx = previewCanvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(result, 0, 0);
+    previewCanvas.style.display = 'block';
     previewBox.style.display = 'none';
-    lastOutput = blob;
+    lastOutput = result;
     downloadBtn.disabled = false;
+    setStatus('✅ 生成成功', 'ok');
   } catch (e) {
-    showError('生成失败: ' + e.message);
-    previewBox.textContent = '上传图片后预览';
+    setStatus('❌ ' + e.message, 'error');
+    console.error(e);
   } finally {
     generateBtn.disabled = false;
     generateBtn.textContent = '🎲 重新生成';
@@ -167,8 +184,8 @@ generateBtn.addEventListener('click', async () => {
 downloadBtn.addEventListener('click', () => {
   if (!lastOutput) return;
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(lastOutput);
-  a.download = 'avatar.png';
+  a.href = lastOutput.toDataURL('image/png');
+  a.download = 'mc-avatar.png';
   a.click();
 });
 </script>
