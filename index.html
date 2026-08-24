@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MC 头像生成器</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem; }
+  h1 { font-size: 1.5rem; margin-bottom: 1.5rem; color: #79c0ff; }
+  .container { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; max-width: 900px; width: 100%; }
+  .panel { background: #16213e; border-radius: 12px; padding: 1.5rem; flex: 1; min-width: 280px; }
+  .panel h2 { font-size: 1rem; color: #a5d6ff; margin-bottom: 1rem; border-bottom: 1px solid #2a3f5f; padding-bottom: 0.5rem; }
+  .form-group { margin-bottom: 1rem; }
+  label { display: block; font-size: 0.85rem; color: #8ab4f8; margin-bottom: 0.3rem; }
+  input[type="file"], select, input[type="number"], input[type="color"] { width: 100%; padding: 0.4rem; border-radius: 6px; border: 1px solid #2a3f5f; background: #0f1629; color: #eee; font-size: 0.9rem; }
+  .preview { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+  .preview img, .preview canvas { max-width: 256px; max-height: 256px; border: 2px solid #2a4; border-radius: 8px; background: #000; image-rendering: pixelated; }
+  .preview .placeholder { width: 256px; height: 256px; border: 2px dashed #2a3f5f; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #555; font-size: 0.85rem; }
+  button { width: 100%; padding: 0.6rem; border-radius: 8px; border: none; background: #238636; color: #fff; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; }
+  button:hover { background: #2ea043; }
+  button:disabled { background: #333; color: #666; cursor: not-allowed; }
+  .hint { font-size: 0.75rem; color: #666; margin-top: 0.3rem; }
+  .color-row { display: flex; gap: 0.5rem; align-items: center; }
+  .color-row input[type="color"] { width: 40px; height: 32px; padding: 0; border-radius: 4px; }
+  .color-row span { font-size: 0.8rem; color: #888; }
+  .error { color: #f66; font-size: 0.85rem; margin-top: 0.5rem; text-align: center; }
+  .loading { color: #79c0ff; font-size: 0.85rem; text-align: center; margin-top: 0.5rem; }
+</style>
+</head>
+<body>
+<h1>🎮 MC 头像生成器</h1>
+<div class="container">
+  <div class="panel">
+    <h2>⚙️ 参数设置</h2>
+    <div class="form-group">
+      <label>上传原图（建议 64×64 或更大）</label>
+      <input type="file" id="sourceFile" accept="image/*">
+    </div>
+    <div class="form-group">
+      <label>描边类型</label>
+      <select id="outlineType">
+        <option value="none">无描边</option>
+        <option value="solid">纯色描边</option>
+        <option value="glow">发光描边</option>
+        <option value="pulse">脉冲描边</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>描边颜色</label>
+      <div class="color-row">
+        <input type="color" id="outlineColor" value="#000000">
+        <input type="color" id="outlineColor2" value="#ffffff">
+        <span>（发光/脉冲用第二个颜色）</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>描边宽度</label>
+      <input type="number" id="outlineWidth" value="2" min="1" max="8">
+    </div>
+    <div class="form-group">
+      <label>背景类型</label>
+      <select id="bgType">
+        <option value="none">无背景</option>
+        <option value="solid">纯色背景</option>
+        <option value="gradient">渐变背景</option>
+        <option value="blur">模糊背景</option>
+        <option value="noise">噪点背景</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>背景颜色</label>
+      <div class="color-row">
+        <input type="color" id="bgColor" value="#1a1a2e">
+        <input type="color" id="bgColor2" value="#16213e">
+        <span>（渐变用第二个颜色）</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>缩放倍数</label>
+      <input type="number" id="scale" value="4" min="1" max="32">
+      <div class="hint">预览建议 4x，下载可用更高倍数</div>
+    </div>
+    <button id="generateBtn" disabled>⬆️ 请先上传图片</button>
+    <div id="statusMsg" class="error" style="display:none"></div>
+  </div>
+  <div class="panel">
+    <h2>🖼️ 预览</h2>
+    <div class="preview">
+      <div class="placeholder" id="previewBox">上传图片后预览</div>
+      <img id="previewImg" style="display:none">
+    </div>
+    <button id="downloadBtn" disabled style="margin-top:1rem">💾 下载头像</button>
+  </div>
+</div>
+
+<script type="module">
+const API_BASE = window.location.origin;
+
+const sourceFile = document.getElementById('sourceFile');
+const previewImg = document.getElementById('previewImg');
+const previewBox = document.getElementById('previewBox');
+const generateBtn = document.getElementById('generateBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const statusMsg = document.getElementById('statusMsg');
+
+let lastOutput = null;
+
+function showError(msg) {
+  statusMsg.textContent = msg;
+  statusMsg.style.display = 'block';
+}
+function hideError() { statusMsg.style.display = 'none'; }
+
+sourceFile.addEventListener('change', () => {
+  generateBtn.disabled = !sourceFile.files[0];
+  generateBtn.textContent = sourceFile.files[0] ? '🎲 生成头像' : '⬆️ 请先上传图片';
+  previewImg.style.display = 'none';
+  previewBox.style.display = 'flex';
+  lastOutput = null;
+  downloadBtn.disabled = true;
+});
+
+generateBtn.addEventListener('click', async () => {
+  if (!sourceFile.files[0]) return;
+  hideError();
+  generateBtn.disabled = true;
+  generateBtn.textContent = '⏳ 生成中...';
+  previewImg.style.display = 'none';
+  previewBox.style.display = 'flex';
+  previewBox.textContent = '生成中...';
+
+  const formData = new FormData();
+  formData.append('image', sourceFile.files[0]);
+  formData.append('outlineType', document.getElementById('outlineType').value);
+  formData.append('outlineColor', document.getElementById('outlineColor').value);
+  formData.append('outlineColor2', document.getElementById('outlineColor2').value);
+  formData.append('outlineWidth', document.getElementById('outlineWidth').value);
+  formData.append('bgType', document.getElementById('bgType').value);
+  formData.append('bgColor', document.getElementById('bgColor').value);
+  formData.append('bgColor2', document.getElementById('bgColor2').value);
+  formData.append('scale', document.getElementById('scale').value);
+
+  try {
+    const res = await fetch(`${API_BASE}/generate`, { method: 'POST', body: formData });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    const buf = await res.arrayBuffer();
+    const blob = new Blob([buf], { type: 'image/png' });
+    const url = URL.createObjectURL(blob);
+    previewImg.src = url;
+    previewImg.style.display = 'block';
+    previewBox.style.display = 'none';
+    lastOutput = blob;
+    downloadBtn.disabled = false;
+  } catch (e) {
+    showError('生成失败: ' + e.message);
+    previewBox.textContent = '上传图片后预览';
+  } finally {
+    generateBtn.disabled = false;
+    generateBtn.textContent = '🎲 重新生成';
+  }
+});
+
+downloadBtn.addEventListener('click', () => {
+  if (!lastOutput) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(lastOutput);
+  a.download = 'avatar.png';
+  a.click();
+});
+</script>
+</body>
+</html>
